@@ -14,18 +14,29 @@ class ProgressService
     /**
      * Menghitung progres satu bab.
      * Formula: (completed_tasks / total_tasks) * 100
+     *
+     * Jika tasks sudah eager-loaded, gunakan collection counting
+     * untuk menghindari N+1 query.
      */
     public function calculateChapterProgress(Chapter $chapter): float
     {
-        $totalTasks = $chapter->tasks()->count();
-        
-        if ($totalTasks === 0) {
-            return 0.0;
+        // Gunakan loaded relation jika tersedia, hindari N+1
+        if ($chapter->relationLoaded('tasks')) {
+            $tasks = $chapter->tasks;
+            $totalTasks = $tasks->count();
+            if ($totalTasks === 0) {
+                return 0.0;
+            }
+            $completedTasks = $tasks->where('status', TaskStatus::Completed)->count();
+        } else {
+            $totalTasks = $chapter->tasks()->count();
+            if ($totalTasks === 0) {
+                return 0.0;
+            }
+            $completedTasks = $chapter->tasks()
+                ->where('status', TaskStatus::Completed)
+                ->count();
         }
-
-        $completedTasks = $chapter->tasks()
-            ->where('status', TaskStatus::Completed)
-            ->count();
 
         return round(($completedTasks / $totalTasks) * 100, 2);
     }
@@ -33,10 +44,13 @@ class ProgressService
     /**
      * Menghitung progres keseluruhan skripsi.
      * Formula: sum(chapter_progress * normalized_weight)
+     *
+     * Eager-load tasks sekali untuk menghindari 2N queries.
      */
     public function calculateOverallProgress(User $user): float
     {
-        $chapters = $user->chapters;
+        // Eager load chapters + tasks dalam 2 query total (bukan 2N+1)
+        $chapters = $user->chapters()->with('tasks')->get();
         $totalWeight = $chapters->sum('weight');
 
         if ($totalWeight == 0) {
@@ -60,60 +74,88 @@ class ProgressService
      */
     public function calculateMilestoneCompletion(Milestone $milestone): float
     {
-        $totalDocs = $milestone->documents()->count();
-
-        if ($totalDocs === 0) {
-            return 0.0;
+        // Gunakan loaded relation jika tersedia
+        if ($milestone->relationLoaded('documents')) {
+            $docs = $milestone->documents;
+            $totalDocs = $docs->count();
+            if ($totalDocs === 0) {
+                return 0.0;
+            }
+            $completedDocs = $docs->where('is_completed', true)->count();
+        } else {
+            $totalDocs = $milestone->documents()->count();
+            if ($totalDocs === 0) {
+                return 0.0;
+            }
+            $completedDocs = $milestone->documents()
+                ->where('is_completed', true)
+                ->count();
         }
-
-        $completedDocs = $milestone->documents()
-            ->where('is_completed', true)
-            ->count();
 
         return round(($completedDocs / $totalDocs) * 100, 2);
     }
 
     /**
      * Mengambil statistik ringkas untuk ditampilkan di dashboard.
+     *
+     * Dioptimasi: eager load sekali, hitung di PHP — total ~5 queries
+     * (sebelumnya bisa 2N+10 queries).
      */
     public function getQuickStats(User $user): array
     {
-        // Total bimbingan selesai
-        $completedGuidances = $user->guidances()
-            ->where('status', GuidanceStatus::Completed)
-            ->count();
+        // Eager load semua relasi yang dibutuhkan dalam batch
+        $user->loadMissing([
+            'chapters.tasks',
+            'milestones',
+            'guidances',
+        ]);
 
-        // Bab selesai (progress 100%)
-        $totalChapters = $user->chapters()->count();
+        $chapters = $user->chapters;
+        $totalChapters = $chapters->count();
         $completedChapters = 0;
-        foreach ($user->chapters as $chapter) {
+        foreach ($chapters as $chapter) {
             if ($this->calculateChapterProgress($chapter) == 100) {
                 $completedChapters++;
             }
         }
 
-        // Berkas lengkap vs Total berkas
-        $totalDocuments = MilestoneDocument::whereHas('milestone', function ($query) use ($user) {
-            $query->where('user_id', $user->id);
-        })->count();
+        // Tasks: hitung dari eager-loaded chapters→tasks
+        $allTasks = $chapters->flatMap->tasks;
+        $totalTasks = $allTasks->count();
+        $completedTasks = $allTasks->where('status', TaskStatus::Completed)->count();
 
-        $completedDocuments = MilestoneDocument::whereHas('milestone', function ($query) use ($user) {
-            $query->where('user_id', $user->id);
-        })->where('is_completed', true)->count();
-
-        // Metrik tambahan untuk widget dashboard
-        $totalMilestones = $user->milestones()->count();
-        $completedMilestones = $user->milestones()
+        // Milestones
+        $milestones = $user->milestones;
+        $totalMilestones = $milestones->count();
+        $completedMilestones = $milestones
             ->where('status', \App\Enums\MilestoneStatus::Completed)
             ->count();
 
-        $chapterIds = $user->chapters()->pluck('id');
-        $totalTasks = \App\Models\ChapterTask::whereIn('chapter_id', $chapterIds)->count();
-        $completedTasks = \App\Models\ChapterTask::whereIn('chapter_id', $chapterIds)
-            ->where('status', TaskStatus::Completed)
+        // Documents: satu query karena relasi nested tidak di-eager-load
+        $milestoneIds = $milestones->pluck('id');
+        $totalDocuments = MilestoneDocument::whereIn('milestone_id', $milestoneIds)->count();
+        $completedDocuments = MilestoneDocument::whereIn('milestone_id', $milestoneIds)
+            ->where('is_completed', true)
             ->count();
 
-        $totalGuidances = $user->guidances()->count();
+        // Guidances
+        $guidances = $user->guidances;
+        $totalGuidances = $guidances->count();
+        $completedGuidances = $guidances
+            ->where('status', GuidanceStatus::Completed)
+            ->count();
+
+        // Overall progress: chapters+tasks sudah loaded, tanpa query tambahan
+        $totalWeight = $chapters->sum('weight');
+        $overallProgress = 0.0;
+        if ($totalWeight > 0) {
+            foreach ($chapters as $chapter) {
+                $chapterProgress = $this->calculateChapterProgress($chapter);
+                $normalizedWeight = $chapter->weight / $totalWeight;
+                $overallProgress += ($chapterProgress * $normalizedWeight);
+            }
+            $overallProgress = round($overallProgress, 2);
+        }
 
         return [
             // Keys original
@@ -124,7 +166,7 @@ class ProgressService
             'total_documents' => $totalDocuments,
 
             // Keys baru yang dibutuhkan widget
-            'overall_progress' => $this->calculateOverallProgress($user),
+            'overall_progress' => $overallProgress,
             'completed_tasks' => $completedTasks,
             'total_tasks' => $totalTasks,
             'completed_milestones' => $completedMilestones,

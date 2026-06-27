@@ -14,17 +14,15 @@ return Application::configure(basePath: dirname(__DIR__))
         // Route API didaftarkan manual via callback agar bisa pakai middleware 'web'
         // (bukan 'api' yang stateless) — ini memungkinkan session cookie Postman bekerja.
         then: function () {
-            Route::middleware(['web'])   // Pakai middleware 'web' agar session aktif
+            Route::middleware(['web', 'throttle:api'])   // Pakai middleware 'web' agar session aktif + rate limit
                 ->prefix('api')
                 ->name('api.')
                 ->group(base_path('routes/api.php'));
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Kecualikan semua route /api/* dari verifikasi CSRF token
-        // agar Postman/cURL tidak perlu mengirim X-XSRF-TOKEN
         $middleware->validateCsrfTokens(except: [
-            'api/*',
+            'api/login',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
@@ -33,4 +31,3 @@ return Application::configure(basePath: dirname(__DIR__))
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
     })->create();
-

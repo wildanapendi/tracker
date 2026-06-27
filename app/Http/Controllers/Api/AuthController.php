@@ -65,17 +65,13 @@ class AuthController extends Controller
 
     /**
      * Cek status autentikasi user saat ini.
+     *
+     * Route sudah dilindungi middleware auth:web,
+     * jadi Auth::user() pasti ada di sini.
      */
     public function me(Request $request): JsonResponse
     {
-        if (! Auth::check()) {
-            return response()->json([
-                'message'         => 'Unauthenticated.',
-                'is_authenticated' => false,
-            ], 401);
-        }
-
-        $user = Auth::user();
+        $user = $request->user();
 
         return response()->json([
             'is_authenticated' => true,

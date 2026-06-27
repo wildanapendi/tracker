@@ -42,16 +42,21 @@ class FortifyServiceProvider extends ServiceProvider
 
     /**
      * Configure Fortify views.
+     *
+     * Login di-handle oleh Filament (->login() di AppPanelProvider).
+     * Fortify views hanya untuk fitur yang belum di-override Filament
+     * (2FA challenge, verify email, reset password).
+     * Semua menggunakan dot-notation standar (bukan namespace pages::).
      */
     private function configureViews(): void
     {
-        Fortify::loginView(fn () => view('pages::auth.login'));
-        Fortify::verifyEmailView(fn () => view('pages::auth.verify-email'));
-        Fortify::twoFactorChallengeView(fn () => view('pages::auth.two-factor-challenge'));
-        Fortify::confirmPasswordView(fn () => view('pages::auth.confirm-password'));
-        Fortify::registerView(fn () => view('pages::auth.register'));
-        Fortify::resetPasswordView(fn () => view('pages::auth.reset-password'));
-        Fortify::requestPasswordResetLinkView(fn () => view('pages::auth.forgot-password'));
+        // Daftarkan ulang di sini jika Filament login dinonaktifkan.
+        Fortify::verifyEmailView(fn () => view('pages.auth.verify-email'));
+        Fortify::twoFactorChallengeView(fn () => view('pages.auth.two-factor-challenge'));
+        Fortify::confirmPasswordView(fn () => view('pages.auth.confirm-password'));
+        Fortify::registerView(fn () => view('pages.auth.register'));
+        Fortify::resetPasswordView(fn () => view('pages.auth.reset-password'));
+        Fortify::requestPasswordResetLinkView(fn () => view('pages.auth.forgot-password'));
     }
 
     /**
@@ -75,6 +80,13 @@ class FortifyServiceProvider extends ServiceProvider
             return Limit::perMinute(10)->by(
                 ($credentialId ?: $request->session()->getId()).'|'.$request->ip(),
             );
+        });
+
+        // Rate limiter untuk API routes (throttle:api di bootstrap/app.php)
+        RateLimiter::for('api', function (Request $request) {
+            return $request->user()
+                ? Limit::perMinute(60)->by($request->user()->id)
+                : Limit::perMinute(10)->by($request->ip());
         });
     }
 }

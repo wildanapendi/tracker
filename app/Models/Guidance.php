@@ -3,7 +3,9 @@
 namespace App\Models;
 
 use App\Enums\GuidanceStatus;
+use App\Policies\GuidancePolicy;
 use Database\Factories\GuidanceFactory;
+use Illuminate\Database\Eloquent\Attributes\UsePolicy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * Mencatat agenda, hasil, action items, dan status bimbingan.
  * Ref: SRS 3.6
  */
+#[UsePolicy(GuidancePolicy::class)]
 class Guidance extends Model
 {
     /** @use HasFactory<GuidanceFactory> */

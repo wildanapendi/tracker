@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Policies\ChapterPolicy;
 use Database\Factories\ChapterFactory;
+use Illuminate\Database\Eloquent\Attributes\UsePolicy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * Urutan dan bobot dapat dikustomisasi per bab.
  * Ref: SRS 3.4
  */
+#[UsePolicy(ChapterPolicy::class)]
 class Chapter extends Model
 {
     /** @use HasFactory<ChapterFactory> */

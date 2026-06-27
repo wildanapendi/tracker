@@ -18,6 +18,11 @@ class CalendarController extends Controller
      */
     public function events(Request $request)
     {
+        $request->validate([
+            'start' => ['nullable', 'date'],
+            'end'   => ['nullable', 'date'],
+        ]);
+
         $userId = auth()->id();
         $start = $request->query('start');
         $end = $request->query('end');
@@ -33,10 +38,11 @@ class CalendarController extends Controller
 
         foreach ($guidances as $guidance) {
             $color = match ($guidance->status) {
-                GuidanceStatus::Scheduled => '#4f46e5', // indigo-600
-                GuidanceStatus::Completed => '#16a34a', // green-600
-                GuidanceStatus::Cancelled => '#dc2626', // red-600
-                default => '#6b7280', // gray-500
+                GuidanceStatus::Scheduled => '#4f46e5',   // indigo-600
+                GuidanceStatus::Completed => '#16a34a',   // green-600
+                GuidanceStatus::Cancelled => '#dc2626',   // red-600
+                GuidanceStatus::Rescheduled => '#d97706', // amber-600 (warning)
+                default => '#6b7280',                     // gray-500
             };
 
             $events->push([

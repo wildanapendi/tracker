@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\Attributes\UsePolicy;
+use App\Policies\MilestonePolicy;
 
 /**
  * Milestone — tahapan besar proses skripsi (Sempro, Sidang, dll).
@@ -17,6 +19,7 @@ use Illuminate\Support\Facades\Storage;
  *
  * BR-10: Hapus milestone → cascade hapus documents + cleanup file fisik.
  */
+#[UsePolicy(MilestonePolicy::class)]
 class Milestone extends Model
 {
     /** @use HasFactory<MilestoneFactory> */
@@ -56,6 +59,18 @@ class Milestone extends Model
      */
     protected static function booted(): void
     {
+        // BR-04: auto-manage completed_at berdasarkan status change (sama seperti ChapterTask)
+        static::saving(function (Milestone $milestone) {
+            if ($milestone->isDirty('status')) {
+                if ($milestone->status === MilestoneStatus::Completed) {
+                    $milestone->completed_at = $milestone->completed_at ?? now();
+                } else {
+                    $milestone->completed_at = null;
+                }
+            }
+        });
+
+        // BR-10: cleanup file fisik sebelum milestone dihapus
         static::deleting(function (Milestone $milestone) {
             $milestone->documents->each(function (MilestoneDocument $doc) {
                 if ($doc->file_path) {
