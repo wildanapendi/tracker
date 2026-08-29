@@ -7,61 +7,60 @@
 ## Daftar Isi
 
 - [SkripsiTracker](#skripsitracker)
-  - [Daftar Isi](#daftar-isi)
-  - [Fitur Utama](#fitur-utama)
-  - [Tech Stack](#tech-stack)
-  - [Struktur Proyek](#struktur-proyek)
-  - [Prasyarat](#prasyarat)
-  - [Setup Lokal (Development)](#setup-lokal-development)
-    - [Satu Perintah (via Composer Script)](#satu-perintah-via-composer-script)
-  - [Environment Variables](#environment-variables)
-  - [Database \& Seeding](#database--seeding)
-    - [Tabel yang Dibuat](#tabel-yang-dibuat)
-  - [Menjalankan Aplikasi](#menjalankan-aplikasi)
-    - [Development Server](#development-server)
-    - [Membuat User Admin (Pertama Kali)](#membuat-user-admin-pertama-kali)
-  - [Menjalankan Test Suite](#menjalankan-test-suite)
-    - [Cakupan Test](#cakupan-test)
-  - [Deployment dengan Docker](#deployment-dengan-docker)
-    - [Langkah Cepat](#langkah-cepat)
-    - [Menggunakan Docker Compose (Direkomendasikan)](#menggunakan-docker-compose-direkomendasikan)
-    - [Isi Direktori `docker/`](#isi-direktori-docker)
-  - [Deployment Manual (VPS / Shared Hosting)](#deployment-manual-vps--shared-hosting)
-  - [Arsitektur \& Desain](#arsitektur--desain)
-    - [Service Layer — `ProgressService`](#service-layer--progressservice)
-    - [Filament Panel](#filament-panel)
-    - [Multi-Tenancy (Per-User)](#multi-tenancy-per-user)
-  - [Lisensi](#lisensi)
+    - [Daftar Isi](#daftar-isi)
+    - [Fitur Utama](#fitur-utama)
+    - [Tech Stack](#tech-stack)
+    - [Struktur Proyek](#struktur-proyek)
+    - [Instalasi \& Setup Lokal](#instalasi--setup-lokal)
+    - [Environment Variables](#environment-variables)
+    - [Database \& Seeding](#database--seeding)
+        - [Tabel yang Dibuat](#tabel-yang-dibuat)
+    - [Menjalankan Aplikasi](#menjalankan-aplikasi)
+        - [Development Server](#development-server)
+        - [Membuat User Admin (Pertama Kali)](#membuat-user-admin-pertama-kali)
+    - [Menjalankan Test Suite](#menjalankan-test-suite)
+        - [Cakupan Test](#cakupan-test)
+    - [Deployment dengan Docker](#deployment-dengan-docker)
+        - [Langkah Cepat](#langkah-cepat)
+        - [Menggunakan Docker Compose (Direkomendasikan)](#menggunakan-docker-compose-direkomendasikan)
+        - [Isi Direktori `docker/`](#isi-direktori-docker)
+    - [Deployment Manual (VPS / Shared Hosting)](#deployment-manual-vps--shared-hosting)
+    - [Arsitektur \& Desain](#arsitektur--desain)
+        - [Service Layer — `ProgressService`](#service-layer--progressservice)
+        - [Filament Panel](#filament-panel)
+        - [Multi-Tenancy (Per-User)](#multi-tenancy-per-user)
+    - [Kontribusi](#kontribusi)
+    - [Lisensi](#lisensi)
 
 ---
 
 ## Fitur Utama
 
-| Modul | Deskripsi |
-|---|---|
-| **Dashboard** | Widget ringkasan: overall progress, quick stats, grafik bab, guidance mendatang, dan status milestone |
-| **Chapter Management** | CRUD bab skripsi + sub-task per bab dengan tracking status (`pending`, `in_progress`, `done`) |
-| **Guidance Log** | Pencatatan sesi bimbingan beserta tanggal, topik, dan status (`scheduled`, `done`, `cancelled`) |
-| **Milestone Tracking** | Pencapaian penting (seminar proposal, sidang, dll) dengan upload dokumen pendukung |
-| **Kalender** | Tampilan kalender interaktif (FullCalendar) yang mengagregasi semua event dari Guidance & Milestone |
-| **Thesis Profile** | Halaman profil skripsi (judul, pembimbing, target selesai, instansi) |
-| **Progress Service** | Service layer terpusat untuk kalkulasi progress per-bab, keseluruhan, dan milestone |
+| Modul                  | Deskripsi                                                                                             |
+| ---------------------- | ----------------------------------------------------------------------------------------------------- |
+| **Dashboard**          | Widget ringkasan: overall progress, quick stats, grafik bab, guidance mendatang, dan status milestone |
+| **Chapter Management** | CRUD bab skripsi + sub-task per bab dengan tracking status (`pending`, `in_progress`, `done`)         |
+| **Guidance Log**       | Pencatatan sesi bimbingan beserta tanggal, topik, dan status (`scheduled`, `done`, `cancelled`)       |
+| **Milestone Tracking** | Pencapaian penting (seminar proposal, sidang, dll) dengan upload dokumen pendukung                    |
+| **Kalender**           | Tampilan kalender interaktif (FullCalendar) yang mengagregasi semua event dari Guidance & Milestone   |
+| **Thesis Profile**     | Halaman profil skripsi (judul, pembimbing, target selesai, instansi)                                  |
+| **Progress Service**   | Service layer terpusat untuk kalkulasi progress per-bab, keseluruhan, dan milestone                   |
 
 ---
 
 ## Tech Stack
 
-| Layer | Teknologi | Versi |
-|---|---|---|
-| Backend Framework | Laravel | ~13.15 |
-| Admin Panel | Filament | ^5.0 |
-| Reactive UI | Livewire + Flux | ^4.1 / ^2.13 |
-| Auth | Laravel Fortify | ^1.37 |
-| PHP | PHP-FPM | ^8.5 |
-| Database | MySQL (prod) / SQLite (dev) | 8.x / 3.x |
-| Frontend Build | Vite + Tailwind CSS | ^8 / ^4 |
-| Testing | PestPHP | ^4.7 |
-| Container | Docker + Nginx + Supervisor | — |
+| Layer             | Teknologi                   | Versi        |
+| ----------------- | --------------------------- | ------------ |
+| Backend Framework | Laravel                     | ~13.15       |
+| Admin Panel       | Filament                    | ^5.0         |
+| Reactive UI       | Livewire + Flux             | ^4.1 / ^2.13 |
+| Auth              | Laravel Fortify             | ^1.37        |
+| PHP               | PHP-FPM                     | ^8.5         |
+| Database          | MySQL (prod) / SQLite (dev) | 8.x / 3.x    |
+| Frontend Build    | Vite + Tailwind CSS         | ^8 / ^4      |
+| Testing           | PestPHP                     | ^4.7         |
+| Container         | Docker + Nginx + Supervisor | —            |
 
 ---
 
@@ -91,53 +90,11 @@ tests/
 
 ---
 
-## Prasyarat
+## Instalasi & Setup Lokal
 
-Pastikan tool berikut sudah terinstall:
+Panduan lengkap prasyarat, instalasi, dan setup development lokal sudah dipindahkan ke file terpisah agar README tetap ringkas:
 
-- **PHP** ≥ 8.5 dengan ekstensi: `bcmath`, `gd`, `intl`, `mbstring`, `opcache`, `pdo_mysql`, `zip`
-- **Composer** ≥ 2.8
-- **Node.js** ≥ 22 + **npm** ≥ 10
-- **MySQL** ≥ 8.0 (produksi) **atau** SQLite (development)
-- **Docker** ≥ 24 (opsional, untuk deployment container)
-
----
-
-## Setup Lokal (Development)
-
-```bash
-# 1. Clone repository
-git clone https://github.com/your-username/skripsi-tracker.git
-cd skripsi-tracker
-
-# 2. Install PHP dependencies
-composer install
-
-# 3. Salin file environment dan generate application key
-cp .env.example .env
-php artisan key:generate
-
-# 4. Konfigurasi database di .env (lihat bagian Environment Variables)
-#    Default menggunakan SQLite:
-touch database/database.sqlite
-
-# 5. Jalankan migrasi dan seeder
-php artisan migrate --seed
-
-# 6. Install Node dependencies dan build asset
-npm install
-npm run build
-
-# 7. (Opsional) Buat symlink storage untuk file upload publik
-php artisan storage:link
-```
-
-### Satu Perintah (via Composer Script)
-
-```bash
-# Menjalankan semua langkah 2–6 sekaligus
-composer setup
-```
+👉 **[Lihat panduan instalasi lengkap di `INSTALLATION.md`](./INSTALLATION.md)**
 
 ---
 
@@ -145,22 +102,22 @@ composer setup
 
 Salin `.env.example` sebagai titik awal untuk development, atau `.env.production.example` untuk produksi.
 
-| Variable | Default (dev) | Keterangan |
-|---|---|---|
-| `APP_NAME` | `SkripsiTracker` | Nama aplikasi yang tampil di UI |
-| `APP_ENV` | `local` | `local` / `production` |
-| `APP_KEY` | *(kosong)* | **Wajib diisi** — `php artisan key:generate` |
-| `APP_DEBUG` | `true` | Set `false` di produksi |
-| `APP_URL` | `http://localhost` | URL publik aplikasi |
-| `DB_CONNECTION` | `sqlite` | `sqlite` / `mysql` |
-| `DB_DATABASE` | *(path SQLite)* | Nama database MySQL di produksi |
-| `DB_USERNAME` | — | Username database (MySQL) |
-| `DB_PASSWORD` | — | Password database (MySQL) |
-| `SESSION_DRIVER` | `database` | `database` / `redis` |
-| `QUEUE_CONNECTION` | `database` | `database` / `redis` |
-| `CACHE_STORE` | `database` | `database` / `redis` |
-| `MAIL_MAILER` | `log` | `log` / `smtp` / `mailgun` |
-| `FILESYSTEM_DISK` | `local` | `local` / `s3` |
+| Variable           | Default (dev)      | Keterangan                                   |
+| ------------------ | ------------------ | -------------------------------------------- |
+| `APP_NAME`         | `SkripsiTracker`   | Nama aplikasi yang tampil di UI              |
+| `APP_ENV`          | `local`            | `local` / `production`                       |
+| `APP_KEY`          | _(kosong)_         | **Wajib diisi** — `php artisan key:generate` |
+| `APP_DEBUG`        | `true`             | Set `false` di produksi                      |
+| `APP_URL`          | `http://localhost` | URL publik aplikasi                          |
+| `DB_CONNECTION`    | `sqlite`           | `sqlite` / `mysql`                           |
+| `DB_DATABASE`      | _(path SQLite)_    | Nama database MySQL di produksi              |
+| `DB_USERNAME`      | —                  | Username database (MySQL)                    |
+| `DB_PASSWORD`      | —                  | Password database (MySQL)                    |
+| `SESSION_DRIVER`   | `database`         | `database` / `redis`                         |
+| `QUEUE_CONNECTION` | `database`         | `database` / `redis`                         |
+| `CACHE_STORE`      | `database`         | `database` / `redis`                         |
+| `MAIL_MAILER`      | `log`              | `log` / `smtp` / `mailgun`                   |
+| `FILESYSTEM_DISK`  | `local`            | `local` / `s3`                               |
 
 Lihat [`.env.production.example`](./.env.production.example) untuk daftar lengkap beserta penjelasan per-variabel.
 
@@ -181,15 +138,15 @@ php artisan db:seed
 
 ### Tabel yang Dibuat
 
-| Tabel | Model | Deskripsi |
-|---|---|---|
-| `thesis_profiles` | `ThesisProfile` | Profil skripsi per user |
-| `chapters` | `Chapter` | Bab skripsi |
-| `chapter_tasks` | `ChapterTask` | Sub-task per bab |
-| `guidances` | `Guidance` | Log sesi bimbingan |
-| `milestones` | `Milestone` | Pencapaian penting |
-| `milestone_documents` | `MilestoneDocument` | Dokumen pendukung milestone |
-| `calendar_events` | `CalendarEvent` | Event gabungan untuk kalender |
+| Tabel                 | Model               | Deskripsi                     |
+| --------------------- | ------------------- | ----------------------------- |
+| `thesis_profiles`     | `ThesisProfile`     | Profil skripsi per user       |
+| `chapters`            | `Chapter`           | Bab skripsi                   |
+| `chapter_tasks`       | `ChapterTask`       | Sub-task per bab              |
+| `guidances`           | `Guidance`          | Log sesi bimbingan            |
+| `milestones`          | `Milestone`         | Pencapaian penting            |
+| `milestone_documents` | `MilestoneDocument` | Dokumen pendukung milestone   |
+| `calendar_events`     | `CalendarEvent`     | Event gabungan untuk kalender |
 
 ---
 
@@ -245,14 +202,14 @@ php artisan test --coverage
 
 ### Cakupan Test
 
-| Test | Jenis | Cakupan |
-|---|---|---|
-| `ProgressServiceTest` | Unit | `calculateChapterProgress`, `calculateOverallProgress`, `calculateMilestoneCompletion`, `getQuickStats` |
-| `ChapterResourceTest` | Feature | List, Create, Edit, Delete chapter via Filament |
-| `GuidanceResourceTest` | Feature | List, Create, Edit, Delete guidance |
-| `MilestoneResourceTest` | Feature | List, Create, Edit, Delete milestone + upload dokumen |
-| `CalendarControllerTest` | Feature | GET `/api/calendar-events` — autentikasi & respons JSON |
-| `ThesisProfileTest` | Feature | Render halaman ThesisProfile Filament |
+| Test                     | Jenis   | Cakupan                                                                                                 |
+| ------------------------ | ------- | ------------------------------------------------------------------------------------------------------- |
+| `ProgressServiceTest`    | Unit    | `calculateChapterProgress`, `calculateOverallProgress`, `calculateMilestoneCompletion`, `getQuickStats` |
+| `ChapterResourceTest`    | Feature | List, Create, Edit, Delete chapter via Filament                                                         |
+| `GuidanceResourceTest`   | Feature | List, Create, Edit, Delete guidance                                                                     |
+| `MilestoneResourceTest`  | Feature | List, Create, Edit, Delete milestone + upload dokumen                                                   |
+| `CalendarControllerTest` | Feature | GET `/api/calendar-events` — autentikasi & respons JSON                                                 |
+| `ThesisProfileTest`      | Feature | Render halaman ThesisProfile Filament                                                                   |
 
 ---
 
@@ -285,38 +242,38 @@ Buat file `docker-compose.yml`:
 version: "3.9"
 
 services:
-  app:
-    build: .
-    image: skripsi-tracker:latest
-    ports:
-      - "80:80"
-    env_file: .env
-    volumes:
-      - storage_data:/var/www/html/storage
-    depends_on:
-      db:
-        condition: service_healthy
-    restart: unless-stopped
+    app:
+        build: .
+        image: skripsi-tracker:latest
+        ports:
+            - "80:80"
+        env_file: .env
+        volumes:
+            - storage_data:/var/www/html/storage
+        depends_on:
+            db:
+                condition: service_healthy
+        restart: unless-stopped
 
-  db:
-    image: mysql:8.0
-    environment:
-      MYSQL_DATABASE:      ${DB_DATABASE}
-      MYSQL_USER:          ${DB_USERNAME}
-      MYSQL_PASSWORD:      ${DB_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-    volumes:
-      - db_data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-    restart: unless-stopped
+    db:
+        image: mysql:8.0
+        environment:
+            MYSQL_DATABASE: ${DB_DATABASE}
+            MYSQL_USER: ${DB_USERNAME}
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+        volumes:
+            - db_data:/var/lib/mysql
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+            interval: 10s
+            timeout: 5s
+            retries: 10
+        restart: unless-stopped
 
 volumes:
-  db_data:
-  storage_data:
+    db_data:
+    storage_data:
 ```
 
 ```bash
@@ -396,6 +353,12 @@ Panel Filament dikonfigurasi di `AppPanelProvider` dengan path `/` agar tidak ad
 ### Multi-Tenancy (Per-User)
 
 Setiap model utama memiliki relasi `belongsTo(User::class)` dan setiap Resource/Query di-scope berdasarkan `auth()->id()` untuk memastikan isolasi data antar pengguna.
+
+---
+
+## Kontribusi
+
+Ingin berkontribusi lewat fork, laporan bug, atau pull request? Lihat panduan lengkapnya di [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 
 ---
 

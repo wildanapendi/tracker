@@ -26,7 +26,6 @@ api_doc.md
 .claude
 
 #Ignore vscode AI rules
-.github
 /Skills
 skills-lock.json
 
@@ -36,3 +35,4 @@ cookies.txt
 _ide_helper.php
 _ide_helper_models.php
 .phpstorm.meta.php
+laravel
