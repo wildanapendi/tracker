@@ -24,32 +24,39 @@ class AppPanelProvider extends PanelProvider
     {
         return $panel
             ->default()
-            ->id('app')
-            ->path('/')                                  // Panel di root path
-            ->login()                                    // Filament login page (replace Fortify)
-            ->registration()                             // Halaman daftar akun baru
-            ->emailVerification()                        // Verifikasi email setelah registrasi
-            ->brandName('Progres Tugas Akhir')
-            ->darkMode(true)                             // Dark mode toggle
+            ->id("app")
+            ->path("/") // Panel di root path
+            ->login() // Filament login page (replace Fortify)
+            ->registration() // Halaman daftar akun baru
+            ->brandName("Progres Tugas Akhir")
+            ->darkMode(true) // Dark mode toggle
             ->sidebarCollapsibleOnDesktop()
             ->colors([
-                'primary' => Color::Indigo,             // Warna utama sesuai plan
+                "primary" => Color::Indigo, // Warna utama sesuai plan
             ])
             ->navigationGroups([
-                NavigationGroup::make('Tracking')
-                    ->icon('heroicon-o-chart-bar'),
-                NavigationGroup::make('Perencanaan')
-                    ->icon('heroicon-o-calendar'),
-                NavigationGroup::make('Pengaturan')
-                    ->icon('heroicon-o-cog-6-tooth'),
+                NavigationGroup::make("Tracking")->icon("heroicon-o-chart-bar"),
+                NavigationGroup::make("Perencanaan")->icon(
+                    "heroicon-o-calendar",
+                ),
+                NavigationGroup::make("Pengaturan")->icon(
+                    "heroicon-o-cog-6-tooth",
+                ),
             ])
-            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
-            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
-            ->pages([
-                Dashboard::class,
-            ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
-            ->widgets([])                               // Widgets didaftarkan via discovery + fase 5
+            ->discoverResources(
+                in: app_path("Filament/Resources"),
+                for: "App\\Filament\\Resources",
+            )
+            ->discoverPages(
+                in: app_path("Filament/Pages"),
+                for: "App\\Filament\\Pages",
+            )
+            ->pages([Dashboard::class])
+            ->discoverWidgets(
+                in: app_path("Filament/Widgets"),
+                for: "App\\Filament\\Widgets",
+            )
+            ->widgets([]) // Widgets didaftarkan via discovery + fase 5
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
@@ -61,8 +68,6 @@ class AppPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
-            ->authMiddleware([
-                Authenticate::class,
-            ]);
+            ->authMiddleware([Authenticate::class]);
     }
 }

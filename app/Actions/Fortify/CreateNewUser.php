@@ -21,15 +21,15 @@ class CreateNewUser implements CreatesNewUsers
     {
         Validator::make($input, [
             ...$this->profileRules(),
-            'password' => $this->passwordRules(),
+            "password" => $this->passwordRules(),
         ])->validate();
 
         return User::create([
-            'name' => $input['name'],
-            'email' => $input['email'],
-            'password' => $input['password'],
-            // Otomatis verifikasi email di mode local/development
-            'email_verified_at' => app()->isProduction() ? null : now(),
+            "name" => $input["name"],
+            "email" => $input["email"],
+            "password" => $input["password"],
+            // Verifikasi email tidak diwajibkan, tandai terverifikasi langsung
+            "email_verified_at" => now(),
         ]);
     }
 }
