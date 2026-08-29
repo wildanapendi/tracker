@@ -28,8 +28,11 @@ api_doc.md
 #Ignore vscode AI rules
 .github
 /Skills
-
 skills-lock.json
 
 # ignore file
 add_feature_daftar-akun.md
+cookies.txt
+_ide_helper.php
+_ide_helper_models.php
+.phpstorm.meta.php
