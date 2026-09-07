@@ -39,7 +39,7 @@ php /var/www/html/artisan event:cache
 # ---------------------------------------------------------------------------
 # 5. Set correct permissions (in case volumes are mounted at runtime)
 # ---------------------------------------------------------------------------
-echo "🔒 Setting directory permissions..."
+echo "Setting directory permissions..."
 chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
